@@ -37,7 +37,14 @@ const AvailabilityCalendar = ({
       <div className="w-full max-w-4xl flex flex-col gap-12">
         <div className=" space-y-4">
           <p className="text-2xl text-white">
-            Please select the days you are available for subsequent parts of this study. To be respectful of other people's time, we ask that you only mark days you are certain you can attend.
+            {`Please select the days you are available for subsequent parts of
+            this study. To be respectful of other people's time, we ask that you
+            only mark days you are certain you can attend.`}
+          </p>
+          <p className="text-2xl text-white mt-4">
+            Select all that apply. You will get 15 credits for this study
+            through 2 additional sessions, however selecting as many as possible
+            increases your chance of being chosen early.
           </p>
         </div>
 

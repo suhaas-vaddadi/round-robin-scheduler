@@ -195,13 +195,38 @@ export default function Demographics({ onContinue }: ClassifcationTaskProps) {
                 Female
               </button>
             </div>
+            <div className="flex space-x-4 mt-2">
+              <button
+                type="button"
+                onClick={() => setSex("prefer not to say")}
+                className={`flex-1 px-4 py-3 border border-white rounded-lg transition-colors ${
+                  sex === "male"
+                    ? "bg-white text-black"
+                    : "bg-gray-800 hover:bg-gray-700 text-white"
+                }`}
+              >
+                Prefer Not To Say
+              </button>
+              <button
+                type="button"
+                onClick={() => setSex("other")}
+                className={`flex-1 px-4 py-3 border border-white rounded-lg transition-colors ${
+                  sex === "female"
+                    ? "bg-white text-black"
+                    : "bg-gray-800 hover:bg-gray-700 text-white"
+                }`}
+              >
+                Other
+              </button>
+            </div>
           </div>
 
           {/* Zip Code */}
           <div>
             <label className="block text-white text-lg mb-2 text-left">
               Please provide the zip code of your permanent address (where you
-              grew up). If you grew up outside the United States, please enter the country name:
+              grew up). If you grew up outside the United States, please enter
+              the country name:
             </label>
             <input
               type="text"
