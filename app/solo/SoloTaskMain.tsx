@@ -19,35 +19,35 @@ const AVAILABILITY_DAYS = [
       { id: "tue_slot2", label: "1:00 PM - 2:30 PM" },
     ],
   },
-    {
+  {
     date: "Tuesday, October 24th",
     blocks: [
       { id: "tue_slot1", label: "9:00 AM - 10:30 AM" },
       { id: "tue_slot2", label: "1:00 PM - 2:30 PM" },
     ],
   },
-    {
+  {
     date: "Tuesday, October 24th",
     blocks: [
       { id: "tue_slot1", label: "9:00 AM - 10:30 AM" },
       { id: "tue_slot2", label: "1:00 PM - 2:30 PM" },
     ],
   },
-    {
+  {
     date: "Tuesday, October 24th",
     blocks: [
       { id: "tue_slot1", label: "9:00 AM - 10:30 AM" },
       { id: "tue_slot2", label: "1:00 PM - 2:30 PM" },
     ],
   },
-    {
+  {
     date: "Tuesday, October 24th",
     blocks: [
       { id: "tue_slot1", label: "9:00 AM - 10:30 AM" },
       { id: "tue_slot2", label: "1:00 PM - 2:30 PM" },
     ],
   },
-    {
+  {
     date: "Tuesday, October 24th",
     blocks: [
       { id: "tue_slot1", label: "9:00 AM - 10:30 AM" },
@@ -61,7 +61,7 @@ const INSTRUCTIONS_TEXT = [
   "Please keep in mind that if you select a date, you are indicating that you are available to attend a session on that date.",
   "If you are unable to attend a scheduled session, please contact us as soon as possible as we would like to be respectful of other's times.",
   "Additionally, our study requires participants to be confident in their english conversational skills.",
-  "If you are not confident, please contact us through SONA as this is a requirement for this study."
+  "If you are not confident, please contact us through SONA as this is a requirement for this study.",
 ];
 
 interface AvailabilityData {
@@ -193,32 +193,19 @@ function ClassificationTaskMain({
       .map(csvEscape)
       .join(",");
   };
+  const ratingPeople = ["your partner", "an average UW-Madison student"];
 
   const [currentStep, setCurrentStep] = useState<string>("instructions");
   const [instructionIndex, setInstructionIndex] = useState<number>(0);
   const [currentPersonIndex, setCurrentPersonIndex] = useState<number>(0);
-  const [shuffledPeople, setShuffledPeople] = useState<string[]>([]);
+  const [shuffledPeople] = useState<string[]>(() =>
+    [...ratingPeople].sort(() => Math.random() - 0.5),
+  );
+  const [blockRandomized] = useState<string[]>(() => ["loneliness", "socialConnectedness", "expressivity"].sort(() => Math.random() - 0.5))
+
   const [allRatings, setAllRatings] = useState<TransitionRating[]>([]);
   const [showTransition, setShowTransition] = useState<boolean>(false);
-  const [formOrder, setFormOrder] = useState<string[]>([]);
-  const [currentFormIndex, setCurrentFormIndex] = useState<number>(0);
-
-  const ratingPeople = [
-    "yourself",
-    "your partner",
-    "an average UW-Madison student",
-  ];
-
-  useEffect(() => {
-    const shuffled = [...ratingPeople].sort(() => Math.random() - 0.5);
-    setShuffledPeople(shuffled);
-    const blockRandomized = [
-      "loneliness",
-      "socialConnectedness",
-      "expressivity",
-    ].sort(() => Math.random() - 0.5);
-
-    const forms = [
+  const [formOrder, setFormOrder] = useState<string[]>([
       "emotionTransitions",
       "selfFrequency",
       "experience",
@@ -230,48 +217,8 @@ function ClassificationTaskMain({
       "partnerHistory",
       "demographics",
       "studyFeedback",
-    ];
-    setFormOrder(forms);
-  }, [csvFilePath, _formData]);
-
-  useEffect(() => {
-    const handleKeyPress = async (_event: KeyboardEvent) => {
-      if (currentStep === "instructions") {
-        if (instructionIndex >= INSTRUCTIONS_TEXT.length - 1) {
-          handleStepComplete();
-          return;
-        }
-        setInstructionIndex((i) => i + 1);
-        return;
-      }
-
-      if (currentStep === "ratings" && showTransition && _event.key === " ") {
-        _event.preventDefault();
-        return;
-      }
-
-      if (currentStep === "completed") {
-        onComplete?.();
-        return;
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [currentStep, instructionIndex, showTransition, onComplete]);
-
-
-  const handleAllTransitionsComplete = async (ratings: TransitionRating[]) => {
-    setAllRatings((prev) => [...prev, ...ratings]);
-
-    if (currentPersonIndex + 1 < shuffledPeople.length) {
-      setShowTransition(true);
-    } else {
-      setCurrentFormIndex(1);
-      setCurrentStep("selfFrequency");
-      console.log("All ratings completed:", allRatings.concat(ratings));
-    }
-  };
+    ]);
+  const [currentFormIndex, setCurrentFormIndex] = useState<number>(0);
 
 
   const handleStepComplete = async (stepData?: StepData) => {
@@ -368,6 +315,44 @@ function ClassificationTaskMain({
     }
   };
 
+  useEffect(() => {
+    const handleKeyPress = async (_event: KeyboardEvent) => {
+      if (currentStep === "instructions") {
+        if (instructionIndex >= INSTRUCTIONS_TEXT.length - 1) {
+          handleStepComplete();
+          return;
+        }
+        setInstructionIndex((i) => i + 1);
+        return;
+      }
+
+      if (currentStep === "ratings" && showTransition && _event.key === " ") {
+        _event.preventDefault();
+        return;
+      }
+
+      if (currentStep === "completed") {
+        onComplete?.();
+        return;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [currentStep, instructionIndex, showTransition, onComplete]);
+
+  const handleAllTransitionsComplete = async (ratings: TransitionRating[]) => {
+    setAllRatings((prev) => [...prev, ...ratings]);
+
+    if (currentPersonIndex + 1 < shuffledPeople.length) {
+      setShowTransition(true);
+    } else {
+      setCurrentFormIndex(1);
+      setCurrentStep("selfFrequency");
+      console.log("All ratings completed:", allRatings.concat(ratings));
+    }
+  };
+
   if (currentStep === "completed") {
     onComplete?.();
     return null;
@@ -393,9 +378,7 @@ function ClassificationTaskMain({
           </div>
         )}
         {currentStep === "demographics" && (
-          <Demographics
-          onContinue={(data) => handleStepComplete(data)}
-          />
+          <Demographics onContinue={(data) => handleStepComplete(data)} />
         )}
       </div>
     </div>

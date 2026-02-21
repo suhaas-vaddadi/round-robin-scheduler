@@ -1,8 +1,69 @@
 import { useState } from "react";
 import ConfirmationModal from "./ui/ConfirmationModal";
 
+
+interface AvailabilityData {
+  availability: Record<string, boolean>;
+}
+
+interface OutstandingDatesData {
+  outstandingDates: string;
+}
+
+interface PartnerHistoryData {
+  partnerHistory: boolean;
+  partnerHistoryMonths: string;
+  matrixSelections: Record<number, number>;
+}
+
+interface SelfFrequencyData {
+  order: string[];
+  ratings: Record<string, string | number>;
+}
+
+interface MatrixData {
+  order: string[];
+  matrixSelections: Record<number, number>;
+}
+
+interface DemographicsData {
+  age: string;
+  hispanicLatino: string;
+  races: string[];
+  otherRace: string;
+  sex: string;
+  zipCode: string;
+}
+
+interface ExperienceData {
+  sync: number;
+  wavelength: number;
+  text: string;
+}
+
+interface StudyFeedbackData {
+  text: string;
+}
+
+interface PartnerSlidersData {
+  order: string[];
+  sliderSelections: Record<number, number>;
+}
+
+
+type StepData =
+  | AvailabilityData
+  | OutstandingDatesData
+  | PartnerHistoryData
+  | SelfFrequencyData
+  | MatrixData
+  | DemographicsData
+  | ExperienceData
+  | StudyFeedbackData
+  | PartnerSlidersData;
+
 export interface ClassifcationTaskProps {
-  onContinue?: (data?: any) => void;
+  onContinue?: (data?: StepData) => void;
 }
 
 export default function Demographics({ onContinue }: ClassifcationTaskProps) {
