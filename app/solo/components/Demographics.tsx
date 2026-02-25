@@ -261,7 +261,7 @@ export default function Demographics({ onContinue }: ClassifcationTaskProps) {
                 type="button"
                 onClick={() => setSex("prefer not to say")}
                 className={`flex-1 px-4 py-3 border border-white rounded-lg transition-colors ${
-                  sex === "male"
+                  sex === "prefer not to say"
                     ? "bg-white text-black"
                     : "bg-gray-800 hover:bg-gray-700 text-white"
                 }`}
@@ -272,7 +272,7 @@ export default function Demographics({ onContinue }: ClassifcationTaskProps) {
                 type="button"
                 onClick={() => setSex("other")}
                 className={`flex-1 px-4 py-3 border border-white rounded-lg transition-colors ${
-                  sex === "female"
+                  sex === "other"
                     ? "bg-white text-black"
                     : "bg-gray-800 hover:bg-gray-700 text-white"
                 }`}

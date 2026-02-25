@@ -5,53 +5,41 @@ import Demographics from "./components/Demographics";
 
 const AVAILABILITY_DAYS = [
   {
-    date: "Monday, October 23rd",
+    date: "Monday, March 2nd",
     blocks: [
-      { id: "mon_slot1", label: "10:00 AM - 11:30 AM" },
-      { id: "mon_slot2", label: "2:00 PM - 3:30 PM" },
-      { id: "mon_slot3", label: "4:00 PM - 5:00 PM" },
+      { id: "mon_slot1", label: "9:00 AM - 11:30 AM" },
+      { id: "mon_slot2", label: "2:00 PM - 4:30 PM" },
+      { id: "mon_slot3", label: "5:00 PM - 7:30 PM" },
     ],
   },
   {
-    date: "Tuesday, October 24th",
+    date: "Tuesday, March 3rd",
     blocks: [
-      { id: "tue_slot1", label: "9:00 AM - 10:30 AM" },
-      { id: "tue_slot2", label: "1:00 PM - 2:30 PM" },
+      { id: "tue_slot1", label: "8:30 AM - 11:00 AM" },
+      { id: "tue_slot2", label: "12:30 PM - 3:00 PM" },
     ],
   },
   {
-    date: "Tuesday, October 24th",
+    date: "Wednesday, March 4th",
     blocks: [
-      { id: "tue_slot1", label: "9:00 AM - 10:30 AM" },
-      { id: "tue_slot2", label: "1:00 PM - 2:30 PM" },
+      { id: "wed_slot1", label: "10:00 AM - 12:30 PM" },
+      { id: "wed_slot2", label: "3:30 PM - 6:00 PM" },
     ],
   },
   {
-    date: "Tuesday, October 24th",
+    date: "Thursday, March 5th",
     blocks: [
-      { id: "tue_slot1", label: "9:00 AM - 10:30 AM" },
-      { id: "tue_slot2", label: "1:00 PM - 2:30 PM" },
+      { id: "thu_slot1", label: "9:30 AM - 12:00 PM" },
+      { id: "thu_slot2", label: "1:00 PM - 3:30 PM" },
+      { id: "thu_slot3", label: "4:30 PM - 7:00 PM" },
     ],
   },
   {
-    date: "Tuesday, October 24th",
+    date: "Friday, March 6th",
     blocks: [
-      { id: "tue_slot1", label: "9:00 AM - 10:30 AM" },
-      { id: "tue_slot2", label: "1:00 PM - 2:30 PM" },
-    ],
-  },
-  {
-    date: "Tuesday, October 24th",
-    blocks: [
-      { id: "tue_slot1", label: "9:00 AM - 10:30 AM" },
-      { id: "tue_slot2", label: "1:00 PM - 2:30 PM" },
-    ],
-  },
-  {
-    date: "Tuesday, October 24th",
-    blocks: [
-      { id: "tue_slot1", label: "9:00 AM - 10:30 AM" },
-      { id: "tue_slot2", label: "1:00 PM - 2:30 PM" },
+      { id: "fri_slot1", label: "8:00 AM - 10:30 AM" },
+      { id: "fri_slot2", label: "11:30 AM - 2:00 PM" },
+      { id: "fri_slot3", label: "3:00 PM - 5:30 PM" },
     ],
   },
 ];
@@ -201,25 +189,28 @@ function ClassificationTaskMain({
   const [shuffledPeople] = useState<string[]>(() =>
     [...ratingPeople].sort(() => Math.random() - 0.5),
   );
-  const [blockRandomized] = useState<string[]>(() => ["loneliness", "socialConnectedness", "expressivity"].sort(() => Math.random() - 0.5))
+  const [blockRandomized] = useState<string[]>(() =>
+    ["loneliness", "socialConnectedness", "expressivity"].sort(
+      () => Math.random() - 0.5,
+    ),
+  );
 
   const [allRatings, setAllRatings] = useState<TransitionRating[]>([]);
   const [showTransition, setShowTransition] = useState<boolean>(false);
   const [formOrder, setFormOrder] = useState<string[]>([
-      "emotionTransitions",
-      "selfFrequency",
-      "experience",
-      "partnerSliders",
-      blockRandomized[0],
-      blockRandomized[1],
-      blockRandomized[2],
-      "autism",
-      "partnerHistory",
-      "demographics",
-      "studyFeedback",
-    ]);
+    "emotionTransitions",
+    "selfFrequency",
+    "experience",
+    "partnerSliders",
+    blockRandomized[0],
+    blockRandomized[1],
+    blockRandomized[2],
+    "autism",
+    "partnerHistory",
+    "demographics",
+    "studyFeedback",
+  ]);
   const [currentFormIndex, setCurrentFormIndex] = useState<number>(0);
-
 
   const handleStepComplete = async (stepData?: StepData) => {
     switch (currentStep) {
