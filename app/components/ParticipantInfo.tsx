@@ -1,12 +1,11 @@
 "use client";
 interface ParticipantFormProps {
   formData: {
-    dyadId: string;
     participantId: string;
-    subjectInitials: string;
-    raName: string;
+    fullName: string;
     sessionTime: string;
     sessionDate: string;
+    email: string;
   };
   onChange: (field: string, value: string) => void;
   onSubmit: () => void;
@@ -27,18 +26,8 @@ function ParticipantForm({
           {`You should find the information for your session in the email you received.`}
         </p>
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-white text-lg mb-2">Dyad ID:</label>
-              <input
-                autoComplete="off"
-                type="text"
-                value={formData.dyadId}
-                onChange={(e) => onChange("dyadId", e.target.value)}
-                className="w-full p-3 text-white bg-gray-800 border border-white rounded-lg focus:outline-none focus:border-blue-400"
-              />
-            </div>
-            <div>
+          <div className="flex w-full gap-4">
+            <div className="w-full">
               <label className="block text-white text-lg mb-2">
                 Participant ID:
               </label>
@@ -51,26 +40,30 @@ function ParticipantForm({
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
+          <div className="flex w-full gap-4">
+            <div className="w-full">
               <label className="block text-white text-lg mb-2">
-                Subject Initials:
+                Full Name:
               </label>
               <input
                 autoComplete="off"
                 type="text"
-                value={formData.subjectInitials}
-                onChange={(e) => onChange("subjectInitials", e.target.value)}
+                value={formData.fullName}
+                onChange={(e) => onChange("fullName", e.target.value)}
                 className="w-full p-3 text-white bg-gray-800 border border-white rounded-lg focus:outline-none focus:border-blue-400"
               />
             </div>
-            <div>
-              <label className="block text-white text-lg mb-2">RA Name:</label>
+          </div>
+          <div className="flex w-full gap-4">
+            <div className="w-full">
+              <label className="block text-white text-lg mb-2">
+                Email:
+              </label>
               <input
                 autoComplete="off"
                 type="text"
-                value={formData.raName}
-                onChange={(e) => onChange("raName", e.target.value)}
+                value={formData.email}
+                onChange={(e) => onChange("email", e.target.value)}
                 className="w-full p-3 text-white bg-gray-800 border border-white rounded-lg focus:outline-none focus:border-blue-400"
               />
             </div>

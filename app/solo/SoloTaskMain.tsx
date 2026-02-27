@@ -78,7 +78,7 @@ interface MatrixData {
 
 interface DemographicsData {
   age: string;
-  hispanicLatino: string;
+  hispanicLatino: boolean;
   races: string[];
   otherRace: string;
   sex: string;
@@ -120,12 +120,11 @@ type StepData =
 
 interface ClassificationTaskMainProps {
   formData: {
-    dyadId: string;
     participantId: string;
-    subjectInitials: string;
-    raName: string;
+    fullName: string;
     sessionTime: string;
     sessionDate: string;
+    email: string;
   };
   csvFilePath: string;
   onComplete?: () => void;
@@ -152,35 +151,6 @@ function ClassificationTaskMain({
     return s;
   };
 
-  const writeCSVRow = async (
-    ratingTask: string,
-    subTask: string,
-    emotion1: string = "",
-    emotion2: string = "",
-    ratingPerson: string = "",
-    response: number | string = "",
-  ) => {
-    return;
-    const row = [
-      _formData.dyadId,
-      _formData.participantId,
-      _formData.subjectInitials,
-      _formData.raName,
-      _formData.sessionTime,
-      _formData.sessionDate,
-      new Date().toISOString(),
-      ratingTask,
-      subTask,
-      emotion1,
-      emotion2,
-      ratingPerson,
-      response,
-      trail_number.current,
-      "1.0.3",
-    ]
-      .map(csvEscape)
-      .join(",");
-  };
   const ratingPeople = ["your partner", "an average UW-Madison student"];
 
   const [currentStep, setCurrentStep] = useState<string>("instructions");
@@ -231,14 +201,19 @@ function ClassificationTaskMain({
               return block && day ? `${day.date}: ${block.label}` : id;
             });
 
-          await writeCSVRow(
-            "availability_calendar",
-            `Selected Availability Slots`,
-            "",
-            "",
-            "",
-            selectedLabels.join("; "),
-          );
+          const result = await fetch(`/api/availability`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              participant_id: _formData.participantId,
+              availabilities: selectedLabels,
+            }),
+          });
+
+          if (!result.ok) {
+            alert("Failed to connect to database. Please contact the researchers.");
+            return;
+          }
         } catch (e) {
           console.error("Failed to save availability data", e);
         }
@@ -250,56 +225,30 @@ function ClassificationTaskMain({
         break;
       case "demographics":
         const demoData = stepData as DemographicsData;
-        await writeCSVRow(
-          "demographics",
-          "Enter your age:",
-          "",
-          "",
-          "",
-          demoData?.age ?? "",
-        );
-        await writeCSVRow(
-          "demographics",
-          "Are you Spanish, Hispanic, or Latino?",
-          "",
-          "",
-          "",
-          demoData?.hispanicLatino ?? "",
-        );
-        await writeCSVRow(
-          "demographics",
-          "Choose one or more races that you consider yourself to be:",
-          "",
-          "",
-          "",
-          demoData?.races?.join(";") ?? "",
-        );
-        await writeCSVRow(
-          "demographics",
-          "Please specify (other race):",
-          "",
-          "",
-          "",
-          demoData?.otherRace ?? "",
-        );
-        await writeCSVRow(
-          "demographics",
-          "What is your sex?",
-          "",
-          "",
-          "",
-          demoData?.sex ?? "",
-        );
-        await writeCSVRow(
-          "demographics",
-          "Please provide the zip code of your permanent address (where you grew up):",
-          "",
-          "",
-          "",
-          demoData?.zipCode ?? "",
-        );
+        console.log("demoData", demoData);
+        try {
+          const result = await fetch(`/api/demographics`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              participant_id: _formData.participantId,
+              age: demoData.age,
+              hispanicLatino: demoData.hispanicLatino,
+              races: demoData.races,
+              otherRace: demoData.otherRace,
+              sex: demoData.sex,
+              zipCode: demoData.zipCode,
+            }),
+          });
+
+          if (!result.ok) {
+            alert("Failed to connect to database. Please contact the researchers.");
+            return;
+          }
+        } catch (e) {
+          console.error("Failed to save demographics data", e);
+        }
         setCurrentStep("completed");
-        onComplete?.();
         break;
       default:
         break;
@@ -331,18 +280,6 @@ function ClassificationTaskMain({
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [currentStep, instructionIndex, showTransition, onComplete]);
-
-  const handleAllTransitionsComplete = async (ratings: TransitionRating[]) => {
-    setAllRatings((prev) => [...prev, ...ratings]);
-
-    if (currentPersonIndex + 1 < shuffledPeople.length) {
-      setShowTransition(true);
-    } else {
-      setCurrentFormIndex(1);
-      setCurrentStep("selfFrequency");
-      console.log("All ratings completed:", allRatings.concat(ratings));
-    }
-  };
 
   if (currentStep === "completed") {
     onComplete?.();

@@ -28,7 +28,7 @@ interface MatrixData {
 
 interface DemographicsData {
   age: string;
-  hispanicLatino: string;
+  hispanicLatino: boolean;
   races: string[];
   otherRace: string;
   sex: string;
@@ -68,7 +68,7 @@ export interface ClassifcationTaskProps {
 
 export default function Demographics({ onContinue }: ClassifcationTaskProps) {
   const [age, setAge] = useState<string>("");
-  const [hispanicLatino, setHispanicLatino] = useState<string>("");
+  const [hispanicLatino, setHispanicLatino] = useState<boolean>(false);
   const [races, setRaces] = useState<string[]>([]);
   const [otherRace, setOtherRace] = useState<string>("");
   const [sex, setSex] = useState<string>("");
@@ -97,7 +97,7 @@ export default function Demographics({ onContinue }: ClassifcationTaskProps) {
 
   const isFormValid = () => {
     const hasAge = age.trim() !== "";
-    const hasHispanicLatino = hispanicLatino !== "";
+    const hasHispanicLatino = hispanicLatino;
     const hasRace = races.length > 0;
     const hasOtherRaceSpecified =
       !races.includes("Other") || otherRace.trim() !== "";
@@ -171,9 +171,9 @@ export default function Demographics({ onContinue }: ClassifcationTaskProps) {
             <div className="flex space-x-4">
               <button
                 type="button"
-                onClick={() => setHispanicLatino("yes")}
+                onClick={() => setHispanicLatino(true)}
                 className={`flex-1 px-4 py-3 border border-white rounded-lg transition-colors ${
-                  hispanicLatino === "yes"
+                  hispanicLatino === true
                     ? "bg-white text-black"
                     : "bg-gray-800 hover:bg-gray-700 text-white"
                 }`}
@@ -182,9 +182,9 @@ export default function Demographics({ onContinue }: ClassifcationTaskProps) {
               </button>
               <button
                 type="button"
-                onClick={() => setHispanicLatino("none")}
+                onClick={() => setHispanicLatino(false)}
                 className={`flex-1 px-4 py-3 border border-white rounded-lg transition-colors ${
-                  hispanicLatino === "none"
+                  hispanicLatino === false
                     ? "bg-white text-black"
                     : "bg-gray-800 hover:bg-gray-700 text-white"
                 }`}
