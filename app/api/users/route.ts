@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const pool = await poolPromise;
     const conn = await pool.getConnection();
     const [result] = await conn.execute(
-      `INSERT INTO RoundRobinStudy.Participant (participant_id, full_name, session_state, session_date, session_time, email) VALUES (?, ?, ?, ?, ?, ?);`,
+      `INSERT INTO RoundRobinStudy.Participant (participant_id, full_name, session_state, session_date, session_time, email) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE full_name = VALUES(full_name), session_date = VALUES(session_date), session_time = VALUES(session_time), email = VALUES(email);`,
       [body.participantId, body.fullName, 0, body.sessionDate, body.sessionTime, body.email]
     );
     conn.release();

@@ -9,12 +9,14 @@ interface ParticipantFormProps {
   };
   onChange: (field: string, value: string) => void;
   onSubmit: () => void;
+  loading?: boolean;
 }
 
 function ParticipantForm({
   formData,
   onChange,
   onSubmit,
+  loading = false,
 }: ParticipantFormProps) {
   return (
     <div className="w-full flex flex-col items-center justify-center bg-black cursor-auto overflow-hidden h-screen">
@@ -97,9 +99,14 @@ function ParticipantForm({
 
           <button
             onClick={onSubmit}
-            className="w-full px-8 py-4 text-white text-xl border border-white bg-black hover:bg-gray-800 transition-colors mt-6"
+            disabled={loading}
+            className={`w-full px-8 py-4 text-white text-xl border border-white transition-colors mt-6 ${
+              loading
+                ? "bg-gray-500 text-gray-300 cursor-not-allowed border-gray-500"
+                : "bg-black hover:bg-gray-800"
+            }`}
           >
-            Continue
+            {loading ? "Loading..." : "Continue"}
           </button>
         </div>
       </div>

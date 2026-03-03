@@ -14,6 +14,7 @@ export default function Home() {
     sessionDate: "",
     email: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -24,31 +25,31 @@ export default function Home() {
 
   const handleFormComplete = async () => {
     if(screen == "participant info") {
-      const result = await fetch(`/api/users/${formData.participantId}`);
-      if(result.status === 404) {
-        const result = await fetch(`/api/users/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
-        if(result.status === 200) {
+      setIsSubmitting(true);
+      try {
+        const result = await fetch(`/api/users/${formData.participantId}`);
+        if(result.status === 404) {
+          const result = await fetch(`/api/users/`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          });
+          if(result.status === 200) {
+            setScreen("individual difference")
+          }
+        }
+        else if(result.status === 200) {
           setScreen("individual difference")
         }
-      }
-      else if(result.status === 200) {
-        const responseData = await result.json();
-        const participant = responseData.data;
-
-        if (participant && (participant.study_status === 0 || participant.session_state === 0)) {
-          setScreen("individual difference")
-        } else {
-          alert("The study has already been completed.")
+        else {
+          alert("Error: Could not connect to database. Please contact the researcher.");
         }
-      }
-      else {
-        alert("Error: Could not connect to database. Please contact the researcher.");
+      } catch (error) {
+        console.error("Failed to submit form completion", error);
+      } finally {
+        setIsSubmitting(false);
       }
     }
     else if(screen == "individual difference") {
@@ -61,6 +62,7 @@ export default function Home() {
       {screen == "participant info" && (
         <ParticipantForm
           formData={formData}
+          loading={isSubmitting}
           onChange={handleFormChange}
           onSubmit={() => handleFormComplete()}
         />

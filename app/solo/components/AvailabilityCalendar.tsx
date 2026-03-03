@@ -13,13 +13,17 @@ export interface DayAvailability {
 interface AvailabilityCalendarProps {
   days: DayAvailability[];
   onComplete: (data: { availability: Record<string, boolean> }) => void;
+  loading?: boolean;
+  initialAvailability?: Record<string, boolean>;
 }
 
 const AvailabilityCalendar = ({
   days,
   onComplete,
+  loading = false,
+  initialAvailability = {},
 }: AvailabilityCalendarProps) => {
-  const [availability, setAvailability] = useState<Record<string, boolean>>({});
+  const [availability, setAvailability] = useState<Record<string, boolean>>(initialAvailability);
 
   const toggleBlock = (blockId: string) => {
     setAvailability((prev) => ({
@@ -104,9 +108,14 @@ const AvailabilityCalendar = ({
         <div className="flex justify-center mt-8">
           <button
             onClick={handleSubmit}
-            className="px-10 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-colors text-xl shadow-lg"
+            disabled={loading}
+            className={`px-10 py-4 font-bold rounded-full transition-colors text-xl shadow-lg ${
+              loading
+                ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                : "bg-white text-black hover:bg-gray-200"
+            }`}
           >
-            Continue
+            {loading ? "Loading..." : "Continue"}
           </button>
         </div>
       </div>

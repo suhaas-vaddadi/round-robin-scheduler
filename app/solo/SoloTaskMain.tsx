@@ -1,48 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Instructions from "./components/ui/Instructions";
-import AvailabilityCalendar from "./components/AvailabilityCalendar";
+import AvailabilityCalendar, { DayAvailability } from "./components/AvailabilityCalendar";
 import Demographics from "./components/Demographics";
-
-const AVAILABILITY_DAYS = [
-  {
-    date: "Monday, March 2nd",
-    blocks: [
-      { id: "mon_slot1", label: "9:00 AM - 11:30 AM" },
-      { id: "mon_slot2", label: "2:00 PM - 4:30 PM" },
-      { id: "mon_slot3", label: "5:00 PM - 7:30 PM" },
-    ],
-  },
-  {
-    date: "Tuesday, March 3rd",
-    blocks: [
-      { id: "tue_slot1", label: "8:30 AM - 11:00 AM" },
-      { id: "tue_slot2", label: "12:30 PM - 3:00 PM" },
-    ],
-  },
-  {
-    date: "Wednesday, March 4th",
-    blocks: [
-      { id: "wed_slot1", label: "10:00 AM - 12:30 PM" },
-      { id: "wed_slot2", label: "3:30 PM - 6:00 PM" },
-    ],
-  },
-  {
-    date: "Thursday, March 5th",
-    blocks: [
-      { id: "thu_slot1", label: "9:30 AM - 12:00 PM" },
-      { id: "thu_slot2", label: "1:00 PM - 3:30 PM" },
-      { id: "thu_slot3", label: "4:30 PM - 7:00 PM" },
-    ],
-  },
-  {
-    date: "Friday, March 6th",
-    blocks: [
-      { id: "fri_slot1", label: "8:00 AM - 10:30 AM" },
-      { id: "fri_slot2", label: "11:30 AM - 2:00 PM" },
-      { id: "fri_slot3", label: "3:00 PM - 5:30 PM" },
-    ],
-  },
-];
 
 const INSTRUCTIONS_TEXT = [
   "You will be asked to select dates for subsequent sessions of the study.",
@@ -78,7 +37,7 @@ interface MatrixData {
 
 interface DemographicsData {
   age: string;
-  hispanicLatino: boolean;
+  hispanicLatino: boolean | undefined;
   races: string[];
   otherRace: string;
   sex: string;
@@ -135,6 +94,117 @@ function ClassificationTaskMain({
   csvFilePath,
   onComplete,
 }: ClassificationTaskMainProps) {
+  const [availabilityDays, setAvailabilityDays] = useState<DayAvailability[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isFetchingInitialData, setIsFetchingInitialData] = useState<boolean>(true);
+  const [initialAvailability, setInitialAvailability] = useState<Record<string, boolean>>({});
+  const [initialDemographics, setInitialDemographics] = useState<DemographicsData | null>(null);
+
+  useEffect(() => {
+    const loadTimes = async () => {
+      try {
+        setIsFetchingInitialData(true);
+        const [resTimes, resAvlbl, resDemo] = await Promise.all([
+          fetch("/api/available_times"),
+          fetch(`/api/availability?participant_id=${_formData.participantId}`),
+          fetch(`/api/demographics?participant_id=${_formData.participantId}`)
+        ]);
+        
+        const jsonTimes = await resTimes.json();
+        if (jsonTimes.data) {
+          const rows = jsonTimes.data as { session_date: string; session_time: string }[];
+          const grouped: Record<string, { id: string; label: string }[]> = {};
+          
+          for (const row of rows) {
+            if (!grouped[row.session_date]) {
+              grouped[row.session_date] = [];
+            }
+            grouped[row.session_date].push({
+              id: `${row.session_date}_${row.session_time}`,
+              label: row.session_time,
+            });
+          }
+
+          const parseTime = (timeStr: string) => {
+            const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+            if (!match) return 0;
+            let hours = parseInt(match[1]);
+            const minutes = parseInt(match[2]);
+            const isPM = match[3].toUpperCase() === "PM";
+            if (isPM && hours !== 12) hours += 12;
+            if (!isPM && hours === 12) hours = 0;
+            return hours * 60 + minutes;
+          };
+
+          const formatted = Object.keys(grouped).map((date) => {
+            // Sort blocks within this day chronologically
+            const sortedBlocks = grouped[date].sort((a, b) => parseTime(a.label) - parseTime(b.label));
+            return {
+              date,
+              blocks: sortedBlocks,
+            };
+          });
+
+          // Sort the days themselves chronologically
+          formatted.sort((a, b) => {
+            const parseDateString = (d: string) => {
+              const parts = d.split(",");
+              const datePart = parts.length > 1 ? parts.slice(1).join(",").trim() : d.trim();
+              const clean = datePart.replace(/(\d+)(st|nd|rd|th)/gi, "$1");
+              const time = new Date(clean).getTime();
+              return isNaN(time) ? 0 : time;
+            };
+            return parseDateString(a.date) - parseDateString(b.date);
+          });
+
+          setAvailabilityDays(formatted);
+        }
+
+        if (resAvlbl.ok) {
+          const jsonAvlbl = await resAvlbl.json();
+          if (jsonAvlbl.data && Array.isArray(jsonAvlbl.data)) {
+            const availMap: Record<string, boolean> = {};
+            jsonAvlbl.data.forEach((row: any) => {
+              if (row.availability_string) {
+                const id = row.availability_string.replace(": ", "_");
+                availMap[id] = true;
+              }
+            });
+            setInitialAvailability(availMap);
+          }
+        }
+
+        if (resDemo.ok) {
+          const jsonDemo = await resDemo.json();
+          if (jsonDemo.data) {
+            const row = jsonDemo.data;
+            let parsedRaces: string[] = [];
+            try {
+              parsedRaces = typeof row.races === "string" ? JSON.parse(row.races) : (row.races || []);
+            } catch (e) {
+              if (typeof row.races === "string") {
+                parsedRaces = row.races.split(",").map((s: string) => s.trim());
+              }
+            }
+            setInitialDemographics({
+              age: row.age?.toString() || "",
+              hispanicLatino: row.hispanic_latino === 1 ? true : row.hispanic_latino === 0 ? false : undefined,
+              races: parsedRaces,
+              otherRace: row.other_race || "",
+              sex: row.sex || "",
+              zipCode: row.zip_code || ""
+            });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load initial data", e);
+      } finally {
+        setIsFetchingInitialData(false);
+      }
+    };
+    loadTimes();
+  }, [_formData.participantId]);
+
   const trail_number = useRef<number>(1);
   const csvEscape = (value: unknown) => {
     const s = value !== undefined && value !== null ? String(value) : "";
@@ -186,16 +256,17 @@ function ClassificationTaskMain({
     switch (currentStep) {
       case "availability":
         try {
+          setIsSubmitting(true);
           const availabilityData = (stepData as AvailabilityData)?.availability;
           const selections = availabilityData || {};
 
-          const allBlocks = AVAILABILITY_DAYS.flatMap((d) => d.blocks);
+          const allBlocks = availabilityDays.flatMap((d) => d.blocks);
 
           const selectedLabels = Object.entries(selections)
             .filter(([_, isSelected]) => isSelected)
             .map(([id, _]) => {
               const block = allBlocks.find((b) => b.id === id);
-              const day = AVAILABILITY_DAYS.find((d) =>
+              const day = availabilityDays.find((d) =>
                 d.blocks.some((b) => b.id === id),
               );
               return block && day ? `${day.date}: ${block.label}` : id;
@@ -212,10 +283,13 @@ function ClassificationTaskMain({
 
           if (!result.ok) {
             alert("Failed to connect to database. Please contact the researchers.");
+            setIsSubmitting(false);
             return;
           }
         } catch (e) {
           console.error("Failed to save availability data", e);
+        } finally {
+          setIsSubmitting(false);
         }
 
         setCurrentStep("demographics");
@@ -227,6 +301,7 @@ function ClassificationTaskMain({
         const demoData = stepData as DemographicsData;
         console.log("demoData", demoData);
         try {
+          setIsSubmitting(true);
           const result = await fetch(`/api/demographics`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -243,10 +318,13 @@ function ClassificationTaskMain({
 
           if (!result.ok) {
             alert("Failed to connect to database. Please contact the researchers.");
+            setIsSubmitting(false);
             return;
           }
         } catch (e) {
           console.error("Failed to save demographics data", e);
+        } finally {
+          setIsSubmitting(false);
         }
         setCurrentStep("completed");
         break;
@@ -286,12 +364,22 @@ function ClassificationTaskMain({
     return null;
   }
 
+  if (isFetchingInitialData) {
+    return (
+      <div className="min-h-full w-full flex flex-col items-center justify-center bg-black">
+        <h1 className="text-white text-2xl animate-pulse">Loading participant data...</h1>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-full w-full flex flex-col items-center justify-center bg-black">
       <div className=" w-full mx-auto px-8">
         {currentStep === "availability" && (
           <AvailabilityCalendar
-            days={AVAILABILITY_DAYS}
+            days={availabilityDays}
+            loading={isSubmitting}
+            initialAvailability={initialAvailability}
             onComplete={(data) => handleStepComplete(data)}
           />
         )}
@@ -306,7 +394,11 @@ function ClassificationTaskMain({
           </div>
         )}
         {currentStep === "demographics" && (
-          <Demographics onContinue={(data) => handleStepComplete(data)} />
+          <Demographics
+            loading={isSubmitting}
+            initialData={initialDemographics}
+            onContinue={(data) => handleStepComplete(data)}
+          />
         )}
       </div>
     </div>

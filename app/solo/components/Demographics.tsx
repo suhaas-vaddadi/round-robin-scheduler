@@ -28,7 +28,7 @@ interface MatrixData {
 
 interface DemographicsData {
   age: string;
-  hispanicLatino: boolean;
+  hispanicLatino: boolean | undefined;
   races: string[];
   otherRace: string;
   sex: string;
@@ -64,15 +64,17 @@ type StepData =
 
 export interface ClassifcationTaskProps {
   onContinue?: (data?: StepData) => void;
+  loading?: boolean;
+  initialData?: DemographicsData | null;
 }
 
-export default function Demographics({ onContinue }: ClassifcationTaskProps) {
-  const [age, setAge] = useState<string>("");
-  const [hispanicLatino, setHispanicLatino] = useState<boolean>(false);
-  const [races, setRaces] = useState<string[]>([]);
-  const [otherRace, setOtherRace] = useState<string>("");
-  const [sex, setSex] = useState<string>("");
-  const [zipCode, setZipCode] = useState<string>("");
+export default function Demographics({ onContinue, loading = false, initialData = null }: ClassifcationTaskProps) {
+  const [age, setAge] = useState<string>(initialData?.age || "");
+  const [hispanicLatino, setHispanicLatino] = useState<boolean | undefined>(initialData?.hispanicLatino);
+  const [races, setRaces] = useState<string[]>(initialData?.races || []);
+  const [otherRace, setOtherRace] = useState<string>(initialData?.otherRace || "");
+  const [sex, setSex] = useState<string>(initialData?.sex || "");
+  const [zipCode, setZipCode] = useState<string>(initialData?.zipCode || "");
   const [showConfirmationModal, setShowConfirmationModal] =
     useState<boolean>(false);
 
@@ -305,9 +307,14 @@ export default function Demographics({ onContinue }: ClassifcationTaskProps) {
         <button
           type="button"
           onClick={handleContinue}
-          className="px-8 py-3 rounded-lg font-semibold transition-colors bg-white text-black hover:bg-gray-200"
+          disabled={loading}
+          className={`px-8 py-3 rounded-lg font-semibold transition-colors ${
+            loading
+              ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+              : "bg-white text-black hover:bg-gray-200"
+          }`}
         >
-          Continue
+          {loading ? "Loading..." : "Continue"}
         </button>
       </div>
 
