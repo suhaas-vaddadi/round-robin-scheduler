@@ -99,7 +99,7 @@ export default function Demographics({ onContinue, loading = false, initialData 
 
   const isFormValid = () => {
     const hasAge = age.trim() !== "";
-    const hasHispanicLatino = hispanicLatino;
+    const hasHispanicLatino = hispanicLatino !== undefined;
     const hasRace = races.length > 0;
     const hasOtherRaceSpecified =
       !races.includes("Other") || otherRace.trim() !== "";
