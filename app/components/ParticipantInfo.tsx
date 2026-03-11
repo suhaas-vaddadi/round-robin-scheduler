@@ -3,8 +3,6 @@ interface ParticipantFormProps {
   formData: {
     participantId: string;
     fullName: string;
-    sessionTime: string;
-    sessionDate: string;
     email: string;
   };
   onChange: (field: string, value: string) => void;
@@ -70,32 +68,7 @@ function ParticipantForm({
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-white text-lg mb-2">
-                Session Date:
-              </label>
-              <input
-                autoComplete="off"
-                type="text"
-                value={formData.sessionDate}
-                onChange={(e) => onChange("sessionDate", e.target.value)}
-                className="w-full p-3 text-white bg-gray-800 border border-white rounded-lg focus:outline-none focus:border-blue-400"
-              />
-            </div>
-            <div>
-              <label className="block text-white text-lg mb-2">
-                Session Time:
-              </label>
-              <input
-                autoComplete="off"
-                type="text"
-                value={formData.sessionTime}
-                onChange={(e) => onChange("sessionTime", e.target.value)}
-                className="w-full p-3 text-white bg-gray-800 border border-white rounded-lg focus:outline-none focus:border-blue-400"
-              />
-            </div>
-          </div>
+
 
           <button
             onClick={onSubmit}

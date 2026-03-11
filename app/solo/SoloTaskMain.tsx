@@ -81,8 +81,6 @@ interface ClassificationTaskMainProps {
   formData: {
     participantId: string;
     fullName: string;
-    sessionTime: string;
-    sessionDate: string;
     email: string;
   };
   csvFilePath: string;

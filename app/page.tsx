@@ -10,8 +10,6 @@ export default function Home() {
   const [formData, setFormData] = useState({
     participantId: "",
     fullName: "",
-    sessionTime: "",
-    sessionDate: "",
     email: "",
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
