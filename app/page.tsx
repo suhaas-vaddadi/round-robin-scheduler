@@ -27,7 +27,7 @@ export default function Home() {
       try {
         const result = await fetch(`/api/users/${formData.participantId}`);
         if(result.status === 404) {
-          const result = await fetch(`/api/users/`, {
+          const result = await fetch(`/api/users`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

@@ -6,8 +6,8 @@ import Demographics from "./components/Demographics";
 const INSTRUCTIONS_TEXT = [
   "You will be asked to select dates for subsequent sessions of the study.",
   "Please keep in mind that if you select a date, you are indicating that you are available to attend a session on that date.",
-  "If you are unable to attend a scheduled session, please contact us as soon as possible as we would like to be respectful of other's times.",
-  "Additionally, our study requires participants to be confident in their english conversational skills.",
+  "If you are unable to attend a scheduled session, please contact us as soon as possible.",
+  "Additionally, our study requires participants to be confident in their English conversational skills.",
   "If you are not confident, please contact us through SONA as this is a requirement for this study.",
 ];
 
